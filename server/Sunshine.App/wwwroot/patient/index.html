@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Care Portal - Sunshine Bangladesh</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: { 50: '#f0fdfa', 600: '#0d9488', 700: '#0f766e', 800: '#115e59', 900: '#134e4a' },
+            sunshine: { 500: '#f59e0b', 600: '#d97706' }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <style> body { font-family: 'Plus Jakarta Sans', 'Hind Siliguri', sans-serif; } </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+    <div class="flex items-center gap-3">
+      <a href="/" class="w-9 h-9 rounded-xl bg-gradient-to-tr from-teal-600 to-amber-500 text-white font-black flex items-center justify-center text-lg shadow-sm">
+        ☀️
+      </a>
+      <div>
+        <h1 class="text-base font-extrabold text-slate-900 tracking-tight">Patient Care Portal (Bangladesh)</h1>
+        <span class="text-[10px] uppercase tracking-wider font-semibold text-teal-700">Appointments, Vault Access & bKash / Nagad Checkout</span>
+      </div>
+    </div>
+
+    <div id="patient-header-auth" class="flex items-center gap-4">
+      <a href="/" class="text-xs font-bold text-slate-500 hover:text-slate-800 transition">Home</a>
+    </div>
+  </header>
+
+  <!-- If Logged Out: Patient Auth (Login / Register Tabs) -->
+  <div id="patient-auth-view" class="flex-1 flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-8 shadow-xl">
+      <div class="text-center mb-6">
+        <h2 class="text-2xl font-black text-slate-900 tracking-tight">Welcome to Sunshine BD</h2>
+        <p class="text-xs text-slate-500 mt-1">Sign in to manage appointments, vault access, and records.</p>
+      </div>
+
+      <!-- 1-Click Demo Accounts -->
+      <div class="bg-teal-50/70 border border-teal-100 rounded-2xl p-3.5 mb-6 text-xs">
+        <div class="font-bold text-teal-900 mb-1.5 flex items-center justify-between">
+          <span>⚡ Select Demo Patient Account</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" onclick="fillPatientDemo('anika@example.com')" class="text-left bg-white border border-teal-200 p-2 rounded-xl text-[11px] hover:border-teal-400">
+            <div class="font-bold text-slate-900">Anika Tabassum</div>
+            <div class="text-emerald-700 text-[10px] font-semibold">Active Subscribed Pass</div>
+          </button>
+          <button type="button" onclick="fillPatientDemo('sazzad@example.com')" class="text-left bg-white border border-teal-200 p-2 rounded-xl text-[11px] hover:border-teal-400">
+            <div class="font-bold text-slate-900">Sazzad Hossain</div>
+            <div class="text-slate-500 text-[10px]">Free Visitor (Paywall test)</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Buttons -->
+      <div class="flex border-b border-slate-100 mb-5">
+        <button type="button" id="tab-btn-login" onclick="toggleAuthTab('login')" class="flex-1 pb-2.5 text-xs font-bold border-b-2 border-teal-600 text-teal-700">
+          Sign In
+        </button>
+        <button type="button" id="tab-btn-reg" onclick="toggleAuthTab('register')" class="flex-1 pb-2.5 text-xs font-bold border-b-2 border-transparent text-slate-400">
+          New Patient Registration
+        </button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="patient-login-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Email Address</label>
+          <input type="email" id="pat-login-email" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-teal-600">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
+          <input type="password" id="pat-login-password" required value="Password123!" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-teal-600">
+        </div>
+        <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl text-sm transition shadow-sm">
+          Sign In to Care Portal
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="patient-reg-form" class="hidden space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Full Legal Name</label>
+          <input type="text" id="reg-name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Email Address</label>
+          <input type="email" id="reg-email" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Create Password</label>
+          <input type="password" id="reg-password" required minlength="6" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Mobile (e.g. +880 17...)</label>
+            <input type="text" id="reg-phone" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Emergency Contact</label>
+            <input type="text" id="reg-emerg" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+          </div>
+        </div>
+        <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-xl text-xs transition mt-2">
+          Create Patient Profile
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- If Logged In: Patient Dashboard -->
+  <div id="patient-dashboard-view" class="hidden flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col md:flex-row gap-6">
+    <!-- Sidebar -->
+    <aside class="md:w-60 flex md:flex-col gap-1.5 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm h-fit">
+      <button onclick="switchPatTab('appointments')" id="pat-tab-appointments" class="pat-tab active text-left text-xs font-bold px-4 py-3 rounded-xl flex items-center gap-2.5 bg-teal-600 text-white transition">
+        <span>📅</span> My Appointments
+      </button>
+      <button onclick="switchPatTab('book')" id="pat-tab-book" class="pat-tab text-left text-xs font-bold px-4 py-3 rounded-xl flex items-center gap-2.5 text-slate-600 hover:bg-slate-100 transition">
+        <span>🩺</span> Book New Session
+      </button>
+      <button onclick="switchPatTab('vault')" id="pat-tab-vault" class="pat-tab text-left text-xs font-bold px-4 py-3 rounded-xl flex items-center gap-2.5 text-slate-600 hover:bg-slate-100 transition">
+        <span>📚</span> Resource Vault
+      </button>
+      <button onclick="switchPatTab('membership')" id="pat-tab-membership" class="pat-tab text-left text-xs font-bold px-4 py-3 rounded-xl flex items-center gap-2.5 text-slate-600 hover:bg-slate-100 transition">
+        <span>💎</span> Membership Pass (৳)
+      </button>
+      <button onclick="switchPatTab('profile')" id="pat-tab-profile" class="pat-tab text-left text-xs font-bold px-4 py-3 rounded-xl flex items-center gap-2.5 text-slate-600 hover:bg-slate-100 transition">
+        <span>👤</span> My Profile
+      </button>
+    </aside>
+
+    <!-- Main Patient Content Panels -->
+    <main class="flex-1 space-y-6">
+
+      <!-- 1. Appointments Panel -->
+      <div id="pat-panel-appointments" class="pat-panel space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-black text-slate-900">My Consultation Sessions</h2>
+            <p class="text-xs text-slate-500">Upcoming virtual sessions (BST) and bKash / Nagad payment receipts.</p>
+          </div>
+          <button onclick="switchPatTab('book')" class="bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition">
+            + Book Session
+          </button>
+        </div>
+
+        <div id="patient-appointments-list" class="space-y-3">
+          <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">Loading your appointments...</div>
+        </div>
+      </div>
+
+      <!-- 2. Book New Session Panel -->
+      <div id="pat-panel-book" class="pat-panel hidden space-y-6">
+        <div>
+          <h2 class="text-xl font-black text-slate-900">Schedule a Therapy Session</h2>
+          <p class="text-xs text-slate-500">Select a specialist and choose an available consultation time (Bangladesh Standard Time).</p>
+        </div>
+
+        <!-- Doctor Selector -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Choose Specialist</label>
+              <select id="book-doctor-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 font-semibold focus:outline-none focus:border-teal-600">
+                <!-- Injected via JS -->
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Select Date</label>
+              <input type="date" id="book-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 font-semibold focus:outline-none focus:border-teal-600">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Reason for Consultation (Optional)</label>
+            <input type="text" id="book-reason" placeholder="e.g. Cognitive restructuring review, panic reduction, exam anxiety..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900">
+          </div>
+
+          <!-- Dynamic Slots Grid -->
+          <div class="pt-4 border-t border-slate-100">
+            <span class="block text-xs font-bold text-slate-700 mb-2">Available Time Windows (BST)</span>
+            <div id="available-slots-container" class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+              <div class="col-span-full py-4 text-center text-slate-400">Select a date to view available time slots.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Resource Vault Panel -->
+      <div id="pat-panel-vault" class="pat-panel hidden space-y-4">
+        <div>
+          <h2 class="text-xl font-black text-slate-900">Self-Help & Clinical Literature (বাংলা ও ইংরেজি)</h2>
+          <p class="text-xs text-slate-500">Access workbooks, sleep roadmaps, and mindfulness audio recordings.</p>
+        </div>
+
+        <div id="patient-resources-list" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- 4. Membership Plans Panel -->
+      <div id="pat-panel-membership" class="pat-panel hidden space-y-6">
+        <div id="patient-active-sub-banner" class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-5">
+          <!-- Injected via JS -->
+        </div>
+
+        <div>
+          <h2 class="text-xl font-black text-slate-900">Membership Tiers (৳ BDT)</h2>
+          <p class="text-xs text-slate-500">Unlock unlimited reading and audio access across our entire mental wellness library with bKash/Nagad.</p>
+        </div>
+
+        <div id="patient-plans-list" class="grid sm:grid-cols-3 gap-4">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- 5. Profile Panel -->
+      <div id="pat-panel-profile" class="pat-panel hidden space-y-6">
+        <div>
+          <h2 class="text-xl font-black text-slate-900">Patient Profile & Contact Information</h2>
+          <p class="text-xs text-slate-500">Manage your contact details, emergency contacts, and personal preferences.</p>
+        </div>
+
+        <form id="patient-profile-form" class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4 text-xs">
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Full Legal Name</label>
+              <input type="text" id="prof-patient-name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-medium">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Registered Email (Read-only)</label>
+              <input type="email" id="prof-patient-email" readonly class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-slate-500 font-medium cursor-not-allowed">
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Mobile Phone (+880 1...)</label>
+              <input type="text" id="prof-patient-phone" placeholder="+8801711223344" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-medium">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Emergency Contact (Bangladesh)</label>
+              <input type="text" id="prof-patient-emerg" placeholder="Guardian / Relative Name & Phone" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-medium">
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Date of Birth</label>
+              <input type="date" id="prof-patient-dob" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-medium">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Gender</label>
+              <select id="prof-patient-gender" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-medium">
+                <option value="">Prefer not to say</option>
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+                <option value="Non-Binary">Non-Binary</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Confidential Medical & Counseling History Notes</label>
+            <textarea id="prof-patient-notes" rows="3" placeholder="Any relevant past clinical history, allergy considerations, or counseling background..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-medium"></textarea>
+          </div>
+
+          <div class="flex justify-end pt-3 border-t border-slate-100">
+            <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition shadow-sm">
+              Save Profile Changes
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Reschedule Modal -->
+  <div id="reschedule-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 text-xs">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="text-base font-black text-slate-900">Reschedule Consultation</h3>
+          <span class="text-[10px] text-teal-700 font-bold" id="reschedule-doc-title">Specialist Session</span>
+        </div>
+        <button onclick="closeRescheduleModal()" class="text-slate-400 hover:text-slate-600 font-bold text-sm">✕</button>
+      </div>
+
+      <input type="hidden" id="reschedule-apt-id">
+      <input type="hidden" id="reschedule-doc-id">
+
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">Choose New Date</label>
+        <input type="date" id="reschedule-date" onchange="fetchRescheduleSlots()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-semibold focus:outline-none focus:border-teal-600">
+      </div>
+
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">Reason for Rescheduling (Optional)</label>
+        <input type="text" id="reschedule-reason" placeholder="e.g. Schedule conflict, personal emergency..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900">
+      </div>
+
+      <div>
+        <label class="block font-bold text-slate-700 mb-2">Available Slots (BST)</label>
+        <div id="reschedule-slots-container" class="grid grid-cols-2 gap-2 text-xs max-h-48 overflow-y-auto">
+          <div class="col-span-full py-4 text-center text-slate-400">Select a date to view open windows.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Bangladesh MFS & Card Sandbox Payment Modal -->
+  <div id="payment-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 text-xs">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="text-base font-black text-slate-900">Payment Checkout (Bangladesh)</h3>
+          <span class="text-[10px] text-teal-700 font-bold">bKash • Nagad • Rocket • Cards</span>
+        </div>
+        <button onclick="closePaymentModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      </div>
+
+      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-1">
+        <div class="flex justify-between font-bold text-slate-900 text-sm">
+          <span id="pay-item-title">Consultation Session</span>
+          <span id="pay-item-amount">৳1,500</span>
+        </div>
+        <p class="text-[11px] text-slate-500" id="pay-item-desc">Advance payment required to confirm appointment slot.</p>
+      </div>
+
+      <!-- Payment Method Selector -->
+      <div>
+        <label class="block font-bold text-slate-700 mb-1.5">Select Payment Channel</label>
+        <div class="grid grid-cols-4 gap-1.5 text-[10px] font-bold">
+          <button type="button" onclick="selectPayMethod('BKASH')" id="mfs-btn-bkash" class="pay-method-btn p-2 rounded-xl border-2 border-pink-500 bg-pink-50 text-pink-700 font-black flex flex-col items-center">
+            <span>বিকাশ</span>
+            <span class="text-[8px] font-normal">bKash</span>
+          </button>
+          <button type="button" onclick="selectPayMethod('NAGAD')" id="mfs-btn-nagad" class="pay-method-btn p-2 rounded-xl border border-slate-200 bg-white text-orange-600 font-black flex flex-col items-center">
+            <span>নগদ</span>
+            <span class="text-[8px] font-normal">Nagad</span>
+          </button>
+          <button type="button" onclick="selectPayMethod('ROCKET')" id="mfs-btn-rocket" class="pay-method-btn p-2 rounded-xl border border-slate-200 bg-white text-purple-700 font-black flex flex-col items-center">
+            <span>রকেট</span>
+            <span class="text-[8px] font-normal">Rocket</span>
+          </button>
+          <button type="button" onclick="selectPayMethod('CARD')" id="mfs-btn-card" class="pay-method-btn p-2 rounded-xl border border-slate-200 bg-white text-slate-700 font-black flex flex-col items-center">
+            <span>Cards</span>
+            <span class="text-[8px] font-normal">Visa/MC</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 1-Click Sandbox Test Number Switcher -->
+      <div class="bg-teal-50 border border-teal-100 rounded-xl p-3">
+        <span class="text-[10px] font-bold uppercase text-teal-800 tracking-wider block mb-1.5">⚡ Bangladesh Sandbox Simulator</span>
+        <div class="grid grid-cols-2 gap-1.5 text-[10px] font-bold">
+          <button type="button" onclick="setTestMfs('01700000000')" class="bg-white p-1.5 rounded-lg border border-teal-200 text-emerald-700 hover:bg-emerald-50">✓ Success (01700...)</button>
+          <button type="button" onclick="setTestMfs('01700000002')" class="bg-white p-1.5 rounded-lg border border-teal-200 text-rose-600 hover:bg-rose-50">✕ Insufficient Balance</button>
+        </div>
+      </div>
+
+      <form id="sandbox-payment-form" class="space-y-3">
+        <input type="hidden" id="pay-type">
+        <input type="hidden" id="pay-target-id">
+        <input type="hidden" id="pay-selected-method" value="BKASH">
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1" id="mfs-acc-label">bKash Mobile Account Number</label>
+          <input type="text" id="mfs-number" required value="01711223344" placeholder="017xxxxxxxx" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono text-xs">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Account Holder Name</label>
+            <input type="text" id="mfs-holder" required value="Anika Tabassum" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">MFS PIN / OTP</label>
+            <input type="password" id="mfs-pin" required value="12345" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono text-xs">
+          </div>
+        </div>
+
+        <button type="submit" id="btn-pay-submit" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-sm mt-2">
+          Confirm bKash Payment
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    let cachedDoctors = [];
+
+    function fillPatientDemo(email) {
+      document.getElementById('pat-login-email').value = email;
+      document.getElementById('pat-login-password').value = 'Password123!';
+    }
+
+    function toggleAuthTab(tab) {
+      const loginForm = document.getElementById('patient-login-form');
+      const regForm = document.getElementById('patient-reg-form');
+      const tabLogin = document.getElementById('tab-btn-login');
+      const tabReg = document.getElementById('tab-btn-reg');
+
+      if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        regForm.classList.add('hidden');
+        tabLogin.classList.add('border-teal-600', 'text-teal-700');
+        tabLogin.classList.remove('border-transparent', 'text-slate-400');
+        tabReg.classList.remove('border-teal-600', 'text-teal-700');
+        tabReg.classList.add('border-transparent', 'text-slate-400');
+      } else {
+        loginForm.classList.add('hidden');
+        regForm.classList.remove('hidden');
+        tabReg.classList.add('border-teal-600', 'text-teal-700');
+        tabReg.classList.remove('border-transparent', 'text-slate-400');
+        tabLogin.classList.remove('border-teal-600', 'text-teal-700');
+        tabLogin.classList.add('border-transparent', 'text-slate-400');
+      }
+    }
+
+    document.getElementById('patient-login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('pat-login-email').value;
+      const password = document.getElementById('pat-login-password').value;
+
+      try {
+        const res = await Sunshine.request('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email, password })
+        });
+        Sunshine.setAuth(res.token, res.user);
+        Sunshine.toast('Welcome back to your Care Portal!', 'success');
+        initPatientView();
+      } catch(err) {}
+    });
+
+    document.getElementById('patient-reg-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const payload = {
+          fullName: document.getElementById('reg-name').value,
+          email: document.getElementById('reg-email').value,
+          password: document.getElementById('reg-password').value,
+          phone: document.getElementById('reg-phone').value,
+          emergencyContact: document.getElementById('reg-emerg').value
+        };
+        const res = await Sunshine.request('/auth/register/patient', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        Sunshine.setAuth(res.token, res.user);
+        Sunshine.toast('Registration complete! Welcome.', 'success');
+        initPatientView();
+      } catch(err) {}
+    });
+
+    function initPatientView() {
+      const user = Sunshine.getUser();
+      if (!user) {
+        document.getElementById('patient-auth-view').classList.remove('hidden');
+        document.getElementById('patient-dashboard-view').classList.add('hidden');
+        return;
+      }
+
+      document.getElementById('patient-auth-view').classList.add('hidden');
+      document.getElementById('patient-dashboard-view').classList.remove('hidden');
+      document.getElementById('patient-header-auth').innerHTML = `
+        <span class="text-xs font-semibold text-slate-600">${user.fullName}</span>
+        <button onclick="Sunshine.logout()" class="text-xs text-rose-600 hover:text-rose-700 font-bold">Logout</button>
+      `;
+
+      loadMyAppointments();
+      loadBookingDoctors();
+      loadPatientResources();
+      loadPatientPlans();
+      loadPatientProfile();
+    }
+
+    function switchPatTab(tab) {
+      document.querySelectorAll('.pat-panel').forEach(p => p.classList.add('hidden'));
+      document.querySelectorAll('.pat-tab').forEach(b => {
+        b.classList.remove('bg-teal-600', 'text-white');
+        b.classList.add('text-slate-600');
+      });
+
+      document.getElementById(`pat-panel-${tab}`).classList.remove('hidden');
+      const btn = document.getElementById(`pat-tab-${tab}`);
+      btn.classList.add('bg-teal-600', 'text-white');
+      btn.classList.remove('text-slate-600');
+    }
+
+    async function loadMyAppointments() {
+      try {
+        const apts = await Sunshine.request('/patient/appointments');
+        const container = document.getElementById('patient-appointments-list');
+        if (apts.length === 0) {
+          container.innerHTML = `<div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">You have no scheduled appointments yet.</div>`;
+          return;
+        }
+
+        container.innerHTML = apts.map(a => `
+          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <span class="font-extrabold text-slate-900 text-sm">${a.doctorName}</span>
+                <span class="text-xs text-teal-700 ml-2">(${a.doctorSpecialization})</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${a.status === 'CONFIRMED' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : a.status === 'PENDING' ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-slate-100 text-slate-500'}">
+                  ${a.status}
+                </span>
+                <span class="text-xs text-slate-500">📅 ${a.appointmentDate} @ ${a.startTime.substring(0, 5)} BST</span>
+              </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+              <div class="text-slate-600">
+                <strong>Policy:</strong> ${a.paymentPolicy} • <strong>Fee:</strong> ${Sunshine.formatBDT(a.consultationFee)} BDT
+                ${a.status === 'PENDING' && a.bookingExpiresAt ? `<div class="text-amber-700 font-semibold mt-0.5">⚠️ Pay via bKash/Nagad within 15 mins to confirm. Held until: ${new Date(a.bookingExpiresAt).toLocaleTimeString()}</div>` : ''}
+              </div>
+
+              <div class="flex items-center gap-2">
+                ${a.status === 'PENDING' ? `
+                  <button onclick="openAppointmentPayment(${a.id}, '${a.doctorName}', ${a.consultationFee})" class="bg-pink-600 hover:bg-pink-700 text-white font-extrabold px-4 py-2 rounded-xl transition">
+                    Pay Now (${Sunshine.formatBDT(a.consultationFee)})
+                  </button>
+                ` : ''}
+                ${a.status !== 'CANCELLED' && a.status !== 'COMPLETED' ? `
+                  <button onclick="openRescheduleModal(${a.id}, ${a.doctorId}, '${a.doctorName.replace(/'/g, "\\'")}')" class="text-teal-700 hover:text-teal-800 font-bold px-2.5 py-1 bg-teal-50 rounded-lg border border-teal-200 hover:bg-teal-100 transition">
+                    Reschedule
+                  </button>
+                  <button onclick="cancelMyAppointment(${a.id})" class="text-rose-600 hover:text-rose-700 font-bold px-2 py-1">
+                    Cancel
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch(e) {}
+    }
+
+    async function cancelMyAppointment(id) {
+      if (!confirm('Are you sure you want to cancel this appointment?')) return;
+      try {
+        await Sunshine.request(`/patient/appointments/${id}/cancel`, { method: 'POST' });
+        Sunshine.toast('Appointment cancelled.', 'info');
+        loadMyAppointments();
+      } catch(e) {}
+    }
+
+    async function loadBookingDoctors() {
+      try {
+        cachedDoctors = await Sunshine.request('/patient/doctors?availableOnly=true');
+        const select = document.getElementById('book-doctor-select');
+        select.innerHTML = cachedDoctors.map(d => `
+          <option value="${d.id}">${d.fullName} — ${d.specialization} (${Sunshine.formatBDT(d.consultationFee)} / ${d.paymentPolicy})</option>
+        `).join('');
+
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('book-date').value = tomorrow.toISOString().split('T')[0];
+
+        select.addEventListener('change', fetchAvailableSlots);
+        document.getElementById('book-date').addEventListener('change', fetchAvailableSlots);
+        fetchAvailableSlots();
+      } catch(e) {}
+    }
+
+    async function fetchAvailableSlots() {
+      const docId = document.getElementById('book-doctor-select').value;
+      const date = document.getElementById('book-date').value;
+      const container = document.getElementById('available-slots-container');
+      if (!docId || !date) return;
+
+      try {
+        const slots = await Sunshine.request(`/patient/doctors/${docId}/slots?date=${date}`);
+        if (slots.length === 0) {
+          container.innerHTML = `<div class="col-span-full py-4 text-center text-slate-400">Doctor has no active working slots on this day.</div>`;
+          return;
+        }
+
+        container.innerHTML = slots.map(s => `
+          <button type="button" ${s.isBooked ? 'disabled' : ''} onclick="selectSlot('${s.startTime}', '${s.endTime}')" class="p-3 rounded-xl border text-center transition ${s.isBooked ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' : 'bg-white border-slate-200 hover:border-teal-500 hover:bg-teal-50 text-slate-800 font-bold'}">
+            <div>${s.startTime.substring(0, 5)} BST</div>
+            <div class="text-[10px] font-normal ${s.isBooked ? 'text-rose-500 font-bold' : 'text-slate-500'}">${s.isBooked ? 'Booked' : 'Available'}</div>
+          </button>
+        `).join('');
+      } catch(e) {}
+    }
+
+    async function selectSlot(startTime, endTime) {
+      const docId = parseInt(document.getElementById('book-doctor-select').value, 10);
+      const date = document.getElementById('book-date').value;
+      const reason = document.getElementById('book-reason').value;
+
+      try {
+        const res = await Sunshine.request('/patient/appointments/book', {
+          method: 'POST',
+          body: JSON.stringify({
+            doctorId: docId,
+            appointmentDate: date,
+            startTime,
+            endTime,
+            reason
+          })
+        });
+
+        Sunshine.toast('Appointment slot reserved successfully!', 'success');
+        switchPatTab('appointments');
+        loadMyAppointments();
+
+        if (res.status === 'PENDING') {
+          openAppointmentPayment(res.id, res.doctorName, res.consultationFee);
+        }
+      } catch(err) {}
+    }
+
+    async function loadPatientResources() {
+      try {
+        const resources = await Sunshine.request('/patient/resources');
+        const container = document.getElementById('patient-resources-list');
+        container.innerHTML = resources.map(r => `
+          <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between">
+            <div class="p-5 flex-1">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded ${r.isPremium ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${r.isPremium ? '🔒 Premium' : 'Free Open'}</span>
+                <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-semibold">${r.resourceType}</span>
+              </div>
+              <h3 class="font-bold text-slate-900 text-sm mb-1">${r.title}</h3>
+              <p class="text-xs text-slate-500 line-clamp-2">${r.description || ''}</p>
+            </div>
+            <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-[11px] text-slate-500">By ${r.author}</span>
+              <button onclick="readResource(${r.id}, ${r.isPremium})" class="text-xs font-bold ${r.hasAccess ? 'text-teal-700 hover:text-teal-800' : 'text-amber-700 hover:text-amber-800'}">
+                ${r.hasAccess ? 'Open Material →' : 'Unlock Access 🔒'}
+              </button>
+            </div>
+          </div>
+        `).join('');
+      } catch(e) {}
+    }
+
+    async function readResource(id, isPremium) {
+      try {
+        const res = await Sunshine.request(`/patient/resources/${id}/access`, { method: 'POST' });
+        if (res.contentUrl) {
+          window.open(res.contentUrl, '_blank');
+        }
+      } catch(err) {
+        if (isPremium) {
+          Sunshine.toast('This guide requires an active subscription pass.', 'warning');
+          switchPatTab('membership');
+        }
+      }
+    }
+
+    async function loadPatientPlans() {
+      try {
+        const res = await Sunshine.request('/patient/subscriptions');
+        const plans = res.plans || [];
+        const activeSub = res.activeSubscription;
+
+        const subBanner = document.getElementById('patient-active-sub-banner');
+        if (activeSub) {
+          subBanner.classList.remove('hidden');
+          subBanner.innerHTML = `
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-800">Your Active Pass</span>
+                <h3 class="text-base font-black text-slate-900">${activeSub.planName}</h3>
+                <p class="text-xs text-slate-600">Valid until ${activeSub.endDate}. Unlimited reading access enabled.</p>
+              </div>
+              <span class="text-xs font-black bg-emerald-600 text-white px-3 py-1 rounded-full">ACTIVE</span>
+            </div>
+          `;
+        }
+
+        const container = document.getElementById('patient-plans-list');
+        container.innerHTML = plans.map(p => `
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
+            <div>
+              <h3 class="font-bold text-slate-900 text-base mb-1">${p.name}</h3>
+              <p class="text-xs text-slate-500 mb-4">${p.description || ''}</p>
+              <div class="text-2xl font-black text-slate-900 mb-4">${Sunshine.formatBDT(p.price)} <span class="text-xs font-normal text-slate-400">/ ${p.durationDays}d</span></div>
+            </div>
+            <button onclick="openSubscriptionPayment(${p.id}, '${p.name}', ${p.price})" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5">
+              <span>Pay via bKash</span> <span>→</span>
+            </button>
+          </div>
+        `).join('');
+      } catch(e) {}
+    }
+
+    // Payment Sandbox Dialog for Bangladesh
+    function selectPayMethod(method) {
+      document.getElementById('pay-selected-method').value = method;
+      document.querySelectorAll('.pay-method-btn').forEach(b => {
+        b.classList.remove('border-2', 'border-pink-500', 'border-orange-500', 'border-purple-500', 'border-slate-800', 'bg-pink-50', 'bg-orange-50', 'bg-purple-50', 'bg-slate-100');
+        b.classList.add('border-slate-200', 'bg-white');
+      });
+
+      const btnMap = {
+        BKASH: 'mfs-btn-bkash',
+        NAGAD: 'mfs-btn-nagad',
+        ROCKET: 'mfs-btn-rocket',
+        CARD: 'mfs-btn-card'
+      };
+
+      const btn = document.getElementById(btnMap[method]);
+      if (btn) {
+        btn.classList.remove('border-slate-200', 'bg-white');
+        btn.classList.add('border-2');
+        if (method === 'BKASH') btn.classList.add('border-pink-500', 'bg-pink-50');
+        if (method === 'NAGAD') btn.classList.add('border-orange-500', 'bg-orange-50');
+        if (method === 'ROCKET') btn.classList.add('border-purple-500', 'bg-purple-50');
+        if (method === 'CARD') btn.classList.add('border-slate-800', 'bg-slate-100');
+      }
+
+      const labels = {
+        BKASH: 'bKash Mobile Account Number',
+        NAGAD: 'Nagad Mobile Account Number',
+        ROCKET: 'Rocket Account Number',
+        CARD: 'Debit / Credit Card Number'
+      };
+      document.getElementById('mfs-acc-label').innerText = labels[method] || 'Account Number';
+
+      const btnSubmit = document.getElementById('btn-pay-submit');
+      btnSubmit.innerText = `Confirm ${method} Payment`;
+      btnSubmit.className = `w-full text-white font-bold py-3 rounded-xl text-xs transition shadow-sm mt-2 ${
+        method === 'BKASH' ? 'bg-pink-600 hover:bg-pink-700' :
+        method === 'NAGAD' ? 'bg-orange-600 hover:bg-orange-700' :
+        method === 'ROCKET' ? 'bg-purple-600 hover:bg-purple-700' : 'bg-slate-900 hover:bg-slate-800'
+      }`;
+    }
+
+    function openAppointmentPayment(aptId, doctorName, fee) {
+      document.getElementById('pay-type').value = 'APPOINTMENT';
+      document.getElementById('pay-target-id').value = aptId;
+      document.getElementById('pay-item-title').innerText = `Session with ${doctorName}`;
+      document.getElementById('pay-item-amount').innerText = Sunshine.formatBDT(fee);
+      document.getElementById('pay-item-desc').innerText = 'Advance payment required to confirm appointment slot in Bangladesh.';
+      selectPayMethod('BKASH');
+      document.getElementById('payment-modal').classList.remove('hidden');
+    }
+
+    function openSubscriptionPayment(planId, planName, price) {
+      document.getElementById('pay-type').value = 'SUBSCRIPTION';
+      document.getElementById('pay-target-id').value = planId;
+      document.getElementById('pay-item-title').innerText = planName;
+      document.getElementById('pay-item-amount').innerText = Sunshine.formatBDT(price);
+      document.getElementById('pay-item-desc').innerText = 'Unlimited access to the mental wellness digital vault.';
+      selectPayMethod('BKASH');
+      document.getElementById('payment-modal').classList.remove('hidden');
+    }
+
+    function closePaymentModal() {
+      document.getElementById('payment-modal').classList.add('hidden');
+    }
+
+    function setTestMfs(num) {
+      document.getElementById('mfs-number').value = num;
+    }
+
+    document.getElementById('sandbox-payment-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pType = document.getElementById('pay-type').value;
+      const targetId = parseInt(document.getElementById('pay-target-id').value, 10);
+      const method = document.getElementById('pay-selected-method').value;
+      const num = document.getElementById('mfs-number').value;
+
+      const payload = {
+        paymentType: pType,
+        appointmentId: pType === 'APPOINTMENT' ? targetId : null,
+        planId: pType === 'SUBSCRIPTION' ? targetId : null,
+        paymentMethod: method,
+        accountNumberOrCard: num,
+        accountHolderName: document.getElementById('mfs-holder').value,
+        otpOrPin: document.getElementById('mfs-pin').value
+      };
+
+      try {
+        const res = await Sunshine.request('/patient/payments/process', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        if (res.success) {
+          Sunshine.toast('Payment authorized successfully! TrxID: ' + res.transactionId, 'success');
+          closePaymentModal();
+          loadMyAppointments();
+          loadPatientPlans();
+          loadPatientResources();
+        } else {
+          Sunshine.toast('Payment declined: ' + res.message, 'error');
+        }
+      } catch(err) {}
+    });
+
+    async function loadPatientProfile() {
+      try {
+        const prof = await Sunshine.request('/patient/profile');
+        if (!prof) return;
+        document.getElementById('prof-patient-name').value = prof.fullName || '';
+        document.getElementById('prof-patient-email').value = prof.email || '';
+        document.getElementById('prof-patient-phone').value = prof.phone || '';
+        document.getElementById('prof-patient-emerg').value = prof.emergencyContact || '';
+        document.getElementById('prof-patient-dob').value = prof.dateOfBirth || '';
+        document.getElementById('prof-patient-gender').value = prof.gender || '';
+        document.getElementById('prof-patient-notes').value = prof.medicalHistoryNotes || '';
+      } catch(e) {}
+    }
+
+    document.getElementById('patient-profile-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const payload = {
+          fullName: document.getElementById('prof-patient-name').value,
+          phone: document.getElementById('prof-patient-phone').value,
+          emergencyContact: document.getElementById('prof-patient-emerg').value,
+          dateOfBirth: document.getElementById('prof-patient-dob').value || null,
+          gender: document.getElementById('prof-patient-gender').value,
+          medicalHistoryNotes: document.getElementById('prof-patient-notes').value
+        };
+        const updated = await Sunshine.request('/patient/profile', {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+        const currentUser = Sunshine.getUser();
+        if (currentUser) {
+          currentUser.fullName = updated.fullName;
+          currentUser.phone = updated.phone;
+          Sunshine.setAuth(Sunshine.getToken(), currentUser);
+        }
+        Sunshine.toast('Patient profile updated successfully!', 'success');
+        initPatientView();
+      } catch(e) {}
+    });
+
+    function openRescheduleModal(aptId, docId, docName) {
+      document.getElementById('reschedule-apt-id').value = aptId;
+      document.getElementById('reschedule-doc-id').value = docId;
+      document.getElementById('reschedule-doc-title').innerText = `Session with ${docName}`;
+      document.getElementById('reschedule-reason').value = '';
+
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      document.getElementById('reschedule-date').value = tomorrow.toISOString().split('T')[0];
+
+      document.getElementById('reschedule-modal').classList.remove('hidden');
+      fetchRescheduleSlots();
+    }
+
+    function closeRescheduleModal() {
+      document.getElementById('reschedule-modal').classList.add('hidden');
+    }
+
+    async function fetchRescheduleSlots() {
+      const docId = document.getElementById('reschedule-doc-id').value;
+      const date = document.getElementById('reschedule-date').value;
+      const container = document.getElementById('reschedule-slots-container');
+      if (!docId || !date) return;
+
+      try {
+        const slots = await Sunshine.request(`/patient/doctors/${docId}/slots?date=${date}`);
+        if (slots.length === 0) {
+          container.innerHTML = `<div class="col-span-full py-4 text-center text-slate-400">Doctor has no active working slots on this day.</div>`;
+          return;
+        }
+
+        container.innerHTML = slots.map(s => `
+          <button type="button" ${s.isBooked ? 'disabled' : ''} onclick="confirmRescheduleSlot('${s.startTime}', '${s.endTime}')" class="p-2.5 rounded-xl border text-center transition ${s.isBooked ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' : 'bg-white border-slate-200 hover:border-teal-500 hover:bg-teal-50 text-slate-800 font-bold'}">
+            <div>${s.startTime.substring(0, 5)} BST</div>
+            <div class="text-[10px] font-normal ${s.isBooked ? 'text-rose-500 font-bold' : 'text-slate-500'}">${s.isBooked ? 'Booked' : 'Available'}</div>
+          </button>
+        `).join('');
+      } catch(e) {}
+    }
+
+    async function confirmRescheduleSlot(newStartTime, newEndTime) {
+      const aptId = parseInt(document.getElementById('reschedule-apt-id').value, 10);
+      const newDate = document.getElementById('reschedule-date').value;
+      const reason = document.getElementById('reschedule-reason').value;
+
+      try {
+        await Sunshine.request(`/patient/appointments/${aptId}/reschedule`, {
+          method: 'POST',
+          body: JSON.stringify({
+            newDate,
+            newStartTime,
+            newEndTime,
+            reason
+          })
+        });
+
+        Sunshine.toast('Appointment rescheduled successfully!', 'success');
+        closeRescheduleModal();
+        loadMyAppointments();
+      } catch(err) {}
+    }
+
+    initPatientView();
+  </script>
+</body>
+</html>

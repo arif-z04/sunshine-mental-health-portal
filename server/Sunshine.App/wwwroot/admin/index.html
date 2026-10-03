@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Operations Console - Sunshine Bangladesh</title>
+  <!-- Material Design + Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: { 50: '#f0fdfa', 100: '#ccfbf1', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e', 800: '#115e59', 900: '#134e4a' },
+            sunshine: { 500: '#f59e0b', 600: '#d97706' },
+            surface: '#ffffff',
+            slate: { 850: '#1e293b' }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', 'Hind Siliguri', sans-serif; }
+    .badge { display: inline-flex; align-items: center; padding: 0.25rem 0.65rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .badge-success { background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .badge-warning { background-color: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .badge-danger { background-color: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
+    .badge-info { background-color: #f0fdfa; color: #0f766e; border: 1px solid #99f6e4; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+
+  <!-- Admin Top Navigation Bar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <button id="mobile-menu-btn" onclick="toggleSidebar()" class="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 focus:outline-none">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+        <a href="/admin" class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-600 to-amber-500 text-white font-black flex items-center justify-center text-lg shadow-sm shadow-teal-500/20">
+            ☀️
+          </div>
+          <div>
+            <span class="text-base font-black tracking-tight text-slate-900">Sunshine<span class="text-amber-500">.</span>Admin</span>
+            <span class="block text-[10px] uppercase font-bold tracking-wider text-teal-700">Bangladesh Operations & Oversight</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <div class="hidden sm:flex flex-col text-right">
+          <span id="admin-user-display" class="text-xs font-bold text-slate-800">Admin</span>
+          <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 justify-end"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Super Admin Session</span>
+        </div>
+        <a href="/" target="_blank" class="hidden md:inline-flex text-xs font-semibold text-slate-600 hover:text-teal-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg border border-slate-200 transition">
+          View Public Site ↗
+        </a>
+        <button onclick="Sunshine.logout()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-3 py-1.5 rounded-lg transition">
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Body Layout -->
+  <div class="flex-1 flex max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 gap-6">
+
+    <!-- Sidebar / Drawer -->
+    <aside id="admin-sidebar" class="fixed md:static inset-y-0 left-0 z-50 md:z-auto w-64 bg-white md:bg-transparent p-4 md:p-0 border-r md:border-r-0 border-slate-200 shadow-xl md:shadow-none flex flex-col gap-1.5 transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out">
+      <div class="md:hidden flex items-center justify-between pb-3 border-b border-slate-100 mb-2">
+        <span class="font-extrabold text-sm text-slate-800">Console Navigation</span>
+        <button onclick="toggleSidebar()" class="text-slate-400 hover:text-slate-700 font-bold text-lg">✕</button>
+      </div>
+
+      <button onclick="switchTab('metrics')" id="tab-btn-metrics" class="tab-btn active w-full text-left text-xs font-bold px-4 py-3 rounded-xl flex items-center gap-3 bg-teal-600 text-white shadow-sm shadow-teal-600/20 transition">
+        <span>📊</span> Platform Overview
+      </button>
+      <button onclick="switchTab('users')" id="tab-btn-users" class="tab-btn w-full text-left text-xs font-bold px-4 py-3 rounded-xl flex items-center gap-3 text-slate-600 hover:bg-slate-100 transition">
+        <span>👥</span> User Management
+      </button>
+      <button onclick="switchTab('doctors')" id="tab-btn-doctors" class="tab-btn w-full text-left text-xs font-bold px-4 py-3 rounded-xl flex items-center gap-3 text-slate-600 hover:bg-slate-100 transition">
+        <span>🩺</span> Counselor Approvals
+      </button>
+      <button onclick="switchTab('appointments')" id="tab-btn-appointments" class="tab-btn w-full text-left text-xs font-bold px-4 py-3 rounded-xl flex items-center gap-3 text-slate-600 hover:bg-slate-100 transition">
+        <span>📅</span> Appointment Ledger
+      </button>
+      <button onclick="switchTab('plans')" id="tab-btn-plans" class="tab-btn w-full text-left text-xs font-bold px-4 py-3 rounded-xl flex items-center gap-3 text-slate-600 hover:bg-slate-100 transition">
+        <span>💎</span> Subscription Plans (BDT)
+      </button>
+      <button onclick="switchTab('resources')" id="tab-btn-resources" class="tab-btn w-full text-left text-xs font-bold px-4 py-3 rounded-xl flex items-center gap-3 text-slate-600 hover:bg-slate-100 transition">
+        <span>📚</span> Resource Vault
+      </button>
+      <button onclick="switchTab('payments')" id="tab-btn-payments" class="tab-btn w-full text-left text-xs font-bold px-4 py-3 rounded-xl flex items-center gap-3 text-slate-600 hover:bg-slate-100 transition">
+        <span>💳</span> bKash / Nagad Ledger
+      </button>
+      <button onclick="switchTab('audit')" id="tab-btn-audit" class="tab-btn w-full text-left text-xs font-bold px-4 py-3 rounded-xl flex items-center gap-3 text-slate-600 hover:bg-slate-100 transition">
+        <span>🛡️</span> Security & Audit Trail
+      </button>
+    </aside>
+
+    <!-- Overlay backdrop for mobile drawer -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 hidden md:hidden"></div>
+
+    <!-- Main Content Work Area -->
+    <main class="flex-1 min-w-0 space-y-6">
+
+      <!-- Breadcrumbs -->
+      <nav class="flex text-xs text-slate-500 font-semibold gap-1.5 items-center">
+        <span>Admin</span>
+        <span>/</span>
+        <span id="current-tab-crumb" class="text-teal-700 font-bold">Platform Overview</span>
+      </nav>
+
+      <!-- 1. Metrics Panel -->
+      <div id="panel-metrics" class="tab-panel space-y-6">
+        <div>
+          <h2 class="text-xl font-black text-slate-900 tracking-tight">Platform Performance & Revenue</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Real-time statistics for Bangladesh telehealth sessions, subscribers, and specialists.</p>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-4" id="kpi-cards">
+          <!-- Loaded via JS -->
+          <div class="p-6 bg-white border border-slate-200 rounded-2xl shadow-xs text-slate-400">Loading metrics...</div>
+        </div>
+      </div>
+
+      <!-- 2. Users Panel -->
+      <div id="panel-users" class="tab-panel hidden space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-black text-slate-900 tracking-tight">User Account Management</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Manage patient and counselor accounts, security statuses, and permissions.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="text" id="user-search-input" onkeyup="filterUsers()" placeholder="Search name, email, phone..." class="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 w-48 sm:w-60 focus:outline-none focus:border-teal-500 shadow-xs">
+            <select id="user-role-filter" onchange="filterUsers()" class="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-teal-500 shadow-xs font-semibold">
+              <option value="">All Roles</option>
+              <option value="PATIENT">Patients</option>
+              <option value="DOCTOR">Counselors</option>
+              <option value="ADMIN">Admins</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-500 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+                <tr>
+                  <th class="p-3.5">User Details</th>
+                  <th class="p-3.5">Role</th>
+                  <th class="p-3.5">Phone Number</th>
+                  <th class="p-3.5">Registered</th>
+                  <th class="p-3.5">Status</th>
+                  <th class="p-3.5 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body" class="divide-y divide-slate-100">
+                <tr><td colspan="6" class="p-6 text-center text-slate-400">Loading user accounts...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Doctors Panel -->
+      <div id="panel-doctors" class="tab-panel hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-black text-slate-900 tracking-tight">BMDC Specialists & Counselors</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Verify Bangladesh Medical & Dental Council (BMDC) credentials and availability.</p>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-500 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+                <tr>
+                  <th class="p-3.5">Specialist</th>
+                  <th class="p-3.5">Credentials & Hospital</th>
+                  <th class="p-3.5">Fee (BDT)</th>
+                  <th class="p-3.5">Policy</th>
+                  <th class="p-3.5">Status</th>
+                  <th class="p-3.5 text-right">BMDC Approval</th>
+                </tr>
+              </thead>
+              <tbody id="doctors-table-body" class="divide-y divide-slate-100">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Appointments Panel -->
+      <div id="panel-appointments" class="tab-panel hidden space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-black text-slate-900 tracking-tight">Universal Appointment Ledger</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Full booking record across Bangladesh with status controls (BST).</p>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-500 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+                <tr>
+                  <th class="p-3.5">ID</th>
+                  <th class="p-3.5">Patient</th>
+                  <th class="p-3.5">Therapist</th>
+                  <th class="p-3.5">Date & Time (BST)</th>
+                  <th class="p-3.5">Status</th>
+                  <th class="p-3.5">Policy / Payment</th>
+                  <th class="p-3.5 text-right">Update Status</th>
+                </tr>
+              </thead>
+              <tbody id="appointments-table-body" class="divide-y divide-slate-100">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Plans Panel -->
+      <div id="panel-plans" class="tab-panel hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-black text-slate-900 tracking-tight">Membership Tier Plans (BDT ৳)</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Configure digital subscription passes for e-books and CBT audio recordings.</p>
+          </div>
+          <button onclick="openPlanModal()" class="text-xs bg-teal-600 hover:bg-teal-700 text-white font-extrabold px-4 py-2 rounded-xl transition shadow-xs">
+            + New Plan
+          </button>
+        </div>
+        <div id="plans-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- 6. Resources Panel -->
+      <div id="panel-resources" class="tab-panel hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-black text-slate-900 tracking-tight">Mental Wellness Resource Vault</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Publish articles, self-care guides, and CBT workbooks.</p>
+          </div>
+          <button onclick="openResourceModal()" class="text-xs bg-teal-600 hover:bg-teal-700 text-white font-extrabold px-4 py-2 rounded-xl transition shadow-xs">
+            + New Resource
+          </button>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-500 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+                <tr>
+                  <th class="p-3.5">Title & Author</th>
+                  <th class="p-3.5">Category</th>
+                  <th class="p-3.5">Type</th>
+                  <th class="p-3.5">Tier</th>
+                  <th class="p-3.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="resources-table-body" class="divide-y divide-slate-100">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Payments Panel -->
+      <div id="panel-payments" class="tab-panel hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-black text-slate-900 tracking-tight">bKash, Nagad & Card Transaction Monitor</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Live transaction verification and automated refund dispatch.</p>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-500 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+                <tr>
+                  <th class="p-3.5">Transaction ID</th>
+                  <th class="p-3.5">User</th>
+                  <th class="p-3.5">Channel</th>
+                  <th class="p-3.5">Amount (BDT)</th>
+                  <th class="p-3.5">Status</th>
+                  <th class="p-3.5 text-right">Refund Action</th>
+                </tr>
+              </thead>
+              <tbody id="payments-table-body" class="divide-y divide-slate-100">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. Audit Log Panel -->
+      <div id="panel-audit" class="tab-panel hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-black text-slate-900 tracking-tight">Security & Operational Audit Log</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Trace administrative logins, doctor verifications, refunds, and policy changes.</p>
+          </div>
+          <button onclick="loadAuditLogs()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg border border-slate-200 transition">
+            ↻ Refresh Logs
+          </button>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-500 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+                <tr>
+                  <th class="p-3.5">Timestamp</th>
+                  <th class="p-3.5">Actor</th>
+                  <th class="p-3.5">Action</th>
+                  <th class="p-3.5">Target</th>
+                  <th class="p-3.5">Audit Details</th>
+                  <th class="p-3.5">IP Address</th>
+                </tr>
+              </thead>
+              <tbody id="audit-table-body" class="divide-y divide-slate-100">
+                <tr><td colspan="6" class="p-6 text-center text-slate-400">Loading audit trail...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Plan Modal -->
+  <div id="plan-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+      <div class="flex items-center justify-between mb-4">
+        <h3 id="plan-modal-title" class="font-extrabold text-base text-slate-900">Manage Plan</h3>
+        <button onclick="closePlanModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      </div>
+      <form id="plan-form" onsubmit="savePlan(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="plan-id">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Plan Title</label>
+          <input type="text" id="plan-name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Duration Type</label>
+            <select id="plan-duration-type" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+              <option value="MONTHLY">Monthly</option>
+              <option value="QUARTERLY">Quarterly</option>
+              <option value="YEARLY">Yearly</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Duration (Days)</label>
+            <input type="number" id="plan-duration-days" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Price (৳ BDT)</label>
+          <input type="number" id="plan-price" step="0.01" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Description</label>
+          <textarea id="plan-description" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2"></textarea>
+        </div>
+        <div class="flex items-center gap-2 pt-2">
+          <input type="checkbox" id="plan-active" checked class="rounded text-teal-600">
+          <label for="plan-active" class="font-bold text-slate-700">Active for new subscriptions</label>
+        </div>
+        <div class="flex gap-2 pt-3">
+          <button type="button" onclick="closePlanModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl transition">Cancel</button>
+          <button type="submit" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-xl transition shadow-xs">Save Plan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Resource Modal -->
+  <div id="resource-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+      <div class="flex items-center justify-between mb-4">
+        <h3 id="resource-modal-title" class="font-extrabold text-base text-slate-900">Manage Resource</h3>
+        <button onclick="closeResourceModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      </div>
+      <form id="resource-form" onsubmit="saveResource(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="res-id">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Category</label>
+          <select id="res-category" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+            <!-- Injected via JS -->
+          </select>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Title</label>
+          <input type="text" id="res-title" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Author / Clinician</label>
+          <input type="text" id="res-author" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Format Type</label>
+            <select id="res-type" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+              <option value="ARTICLE">Article / PDF</option>
+              <option value="BOOK">Workbook / Book</option>
+              <option value="AUDIO">Audio Guide</option>
+              <option value="VIDEO">Video Masterclass</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Access Level</label>
+            <select id="res-premium" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+              <option value="false">Free Open Access</option>
+              <option value="true">Premium Subscribed</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Content URL / Download Link</label>
+          <input type="url" id="res-url" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Description</label>
+          <textarea id="res-description" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2"></textarea>
+        </div>
+        <div class="flex gap-2 pt-3">
+          <button type="button" onclick="closeResourceModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl transition">Cancel</button>
+          <button type="submit" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-xl transition shadow-xs">Publish</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    const user = Sunshine.getUser();
+    if (!user || user.role !== 'ADMIN') {
+      window.location.href = '/admin/login';
+    } else {
+      document.getElementById('admin-user-display').textContent = user.fullName || user.email;
+    }
+
+    let allUsersCache = [];
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('admin-sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      const isOpen = !sidebar.classList.contains('-translate-x-full');
+      if (isOpen) {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+      } else {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+      }
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('bg-teal-600', 'text-white', 'shadow-sm', 'shadow-teal-600/20');
+        b.classList.add('text-slate-600', 'hover:bg-slate-100');
+      });
+
+      const activeBtn = document.getElementById(`tab-btn-${tab}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+        activeBtn.classList.add('bg-teal-600', 'text-white', 'shadow-sm', 'shadow-teal-600/20');
+      }
+
+      const panel = document.getElementById(`panel-${tab}`);
+      if (panel) panel.classList.remove('hidden');
+
+      const crumbMap = {
+        metrics: 'Platform Overview',
+        users: 'User Management',
+        doctors: 'Counselor Approvals',
+        appointments: 'Appointment Ledger',
+        plans: 'Subscription Plans',
+        resources: 'Resource Vault',
+        payments: 'bKash / Nagad Ledger',
+        audit: 'Security & Audit Trail'
+      };
+      document.getElementById('current-tab-crumb').textContent = crumbMap[tab] || 'Overview';
+
+      // Close mobile drawer if open
+      if (window.innerWidth < 768) {
+        document.getElementById('admin-sidebar').classList.add('-translate-x-full');
+        document.getElementById('sidebar-overlay').classList.add('hidden');
+      }
+
+      if (tab === 'metrics') loadMetrics();
+      if (tab === 'users') loadUsers();
+      if (tab === 'doctors') loadDoctors();
+      if (tab === 'appointments') loadAppointments();
+      if (tab === 'plans') loadPlans();
+      if (tab === 'resources') loadResources();
+      if (tab === 'payments') loadPayments();
+      if (tab === 'audit') loadAuditLogs();
+    }
+
+    async function loadMetrics() {
+      try {
+        const m = await Sunshine.request('/admin/metrics');
+        document.getElementById('kpi-cards').innerHTML = `
+          <div class="p-5 bg-white border border-slate-200 rounded-2xl shadow-xs">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total BDT Revenue</span>
+            <div class="text-2xl sm:text-3xl font-black text-teal-800 mt-1">${Sunshine.formatBDT(m.totalRevenue)}</div>
+            <span class="text-[11px] text-emerald-600 font-semibold mt-2 inline-flex items-center gap-1">✓ bKash, Nagad & Cards</span>
+          </div>
+          <div class="p-5 bg-white border border-slate-200 rounded-2xl shadow-xs">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Active Appointments</span>
+            <div class="text-2xl sm:text-3xl font-black text-amber-600 mt-1">${m.activeAppointments}</div>
+            <span class="text-[11px] text-slate-500 font-semibold mt-2 block">Confirmed upcoming sessions</span>
+          </div>
+          <div class="p-5 bg-white border border-slate-200 rounded-2xl shadow-xs">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Active Subscriptions</span>
+            <div class="text-2xl sm:text-3xl font-black text-indigo-700 mt-1">${m.activeSubscriptions}</div>
+            <span class="text-[11px] text-slate-500 font-semibold mt-2 block">CBT vault memberships</span>
+          </div>
+          <div class="p-5 bg-white border border-slate-200 rounded-2xl shadow-xs">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Verified Clinicians</span>
+            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">${m.totalDoctors}</div>
+            <span class="text-[11px] text-slate-500 font-semibold mt-2 block">BSMMU, DU, NIMH faculty</span>
+          </div>
+          <div class="p-5 bg-white border border-slate-200 rounded-2xl shadow-xs">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Registered Patients</span>
+            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">${m.totalPatients}</div>
+            <span class="text-[11px] text-slate-500 font-semibold mt-2 block">Bangladesh user accounts</span>
+          </div>
+          <div class="p-5 bg-white border border-slate-200 rounded-2xl shadow-xs">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Digital Resources</span>
+            <div class="text-2xl sm:text-3xl font-black text-teal-700 mt-1">${m.totalResources}</div>
+            <span class="text-[11px] text-slate-500 font-semibold mt-2 block">CBT books, guides & audio</span>
+          </div>
+        `;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadUsers() {
+      try {
+        allUsersCache = await Sunshine.request('/admin/users');
+        renderUsers(allUsersCache);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderUsers(list) {
+      const tbody = document.getElementById('users-table-body');
+      if (!list || list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-400">No users found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = list.map(u => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="p-3.5">
+            <div class="font-bold text-slate-900">${u.fullName}</div>
+            <div class="text-[11px] text-slate-400">${u.email}</div>
+          </td>
+          <td class="p-3.5">
+            <span class="badge ${u.role === 'ADMIN' ? 'badge-danger' : (u.role === 'DOCTOR' ? 'badge-info' : 'badge-warning')}">${u.role}</span>
+          </td>
+          <td class="p-3.5 text-slate-600">${u.phone || '—'}</td>
+          <td class="p-3.5 text-slate-500">${new Date(u.createdAt).toLocaleDateString('en-BD')}</td>
+          <td class="p-3.5">
+            <span class="badge ${u.isActive ? 'badge-success' : 'badge-danger'}">${u.isActive ? 'Active' : 'Suspended'}</span>
+          </td>
+          <td class="p-3.5 text-right">
+            <button onclick="toggleUserStatus(${u.id}, ${!u.isActive})" class="text-xs font-bold px-3 py-1.5 rounded-lg border transition ${u.isActive ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100' : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'}">
+              ${u.isActive ? 'Suspend' : 'Activate'}
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterUsers() {
+      const query = (document.getElementById('user-search-input').value || '').toLowerCase().trim();
+      const role = document.getElementById('user-role-filter').value;
+      const filtered = allUsersCache.filter(u => {
+        const matchesQuery = !query ||
+          u.fullName.toLowerCase().includes(query) ||
+          u.email.toLowerCase().includes(query) ||
+          (u.phone && u.phone.includes(query));
+        const matchesRole = !role || u.role === role;
+        return matchesQuery && matchesRole;
+      });
+      renderUsers(filtered);
+    }
+
+    async function toggleUserStatus(id, newStatus) {
+      if (!confirm(`Are you sure you want to ${newStatus ? 'activate' : 'suspend'} this user account?`)) return;
+      try {
+        await Sunshine.request(`/admin/users/${id}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify({ isActive: newStatus })
+        });
+        Sunshine.toast(`User account successfully ${newStatus ? 'activated' : 'suspended'}.`, 'success');
+        loadUsers();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadDoctors() {
+      try {
+        const list = await Sunshine.request('/admin/doctors');
+        const tbody = document.getElementById('doctors-table-body');
+        tbody.innerHTML = list.map(d => `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="p-3.5">
+              <div class="font-bold text-slate-900">${d.fullName}</div>
+              <div class="text-[11px] text-slate-400">${d.email} | ${d.phone || ''}</div>
+            </td>
+            <td class="p-3.5">
+              <div class="font-semibold text-slate-700">${d.specialization}</div>
+              <div class="text-[11px] text-slate-500">${d.qualification || '—'}</div>
+            </td>
+            <td class="p-3.5 font-bold text-slate-900">${Sunshine.formatBDT(d.consultationFee)}</td>
+            <td class="p-3.5">
+              <span class="badge ${d.paymentPolicy === 'ADVANCE' ? 'badge-info' : 'badge-warning'}">${d.paymentPolicy}</span>
+            </td>
+            <td class="p-3.5">
+              <span class="badge ${d.isAvailable ? 'badge-success' : 'badge-danger'}">${d.isAvailable ? 'Approved / Active' : 'Suspended'}</span>
+            </td>
+            <td class="p-3.5 text-right">
+              <button onclick="verifyDoctor(${d.id}, ${!d.isAvailable})" class="text-xs font-bold px-3 py-1.5 rounded-lg border transition ${d.isAvailable ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100' : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'}">
+                ${d.isAvailable ? 'Suspend Specialist' : 'Verify & Approve'}
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function verifyDoctor(id, isAvailable) {
+      try {
+        await Sunshine.request(`/admin/doctors/${id}/verify`, {
+          method: 'PATCH',
+          body: JSON.stringify({ isAvailable })
+        });
+        Sunshine.toast(`Specialist status updated to: ${isAvailable ? 'Active' : 'Suspended'}.`, 'success');
+        loadDoctors();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadAppointments() {
+      try {
+        const list = await Sunshine.request('/admin/appointments');
+        const tbody = document.getElementById('appointments-table-body');
+        tbody.innerHTML = list.map(a => `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="p-3.5 font-mono text-[11px] text-slate-500">#${a.id}</td>
+            <td class="p-3.5">
+              <div class="font-bold text-slate-900">${a.patientName}</div>
+              <div class="text-[11px] text-slate-400">${a.patientEmail}</div>
+            </td>
+            <td class="p-3.5 font-semibold text-slate-800">${a.doctorName}</td>
+            <td class="p-3.5">
+              <div class="font-bold text-slate-900">${a.appointmentDate}</div>
+              <div class="text-[11px] text-slate-500">${a.startTime} - ${a.endTime} BST</div>
+            </td>
+            <td class="p-3.5">
+              <span class="badge ${a.status === 'CONFIRMED' ? 'badge-success' : (a.status === 'PENDING' ? 'badge-warning' : (a.status === 'COMPLETED' ? 'badge-info' : 'badge-danger'))}">${a.status}</span>
+            </td>
+            <td class="p-3.5">
+              <div class="text-xs font-semibold text-slate-700">${a.paymentPolicy} (${Sunshine.formatBDT(a.consultationFee)})</div>
+              <div class="text-[10px] text-slate-400">${a.paymentStatus ? `Paid: ${a.paymentStatus}` : (a.isExpired ? '15m window expired' : 'Pending payment')}</div>
+            </td>
+            <td class="p-3.5 text-right">
+              <select onchange="updateAppointmentStatus(${a.id}, this.value)" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 focus:outline-none focus:border-teal-500 font-semibold">
+                <option value="" disabled selected>Change Status</option>
+                <option value="CONFIRMED">Confirm</option>
+                <option value="COMPLETED">Complete</option>
+                <option value="CANCELLED">Cancel</option>
+                <option value="NO_SHOW">No Show</option>
+              </select>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function updateAppointmentStatus(id, status) {
+      if (!status) return;
+      try {
+        await Sunshine.request(`/admin/appointments/${id}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status, notes: `Status manually updated to ${status} by admin.` })
+        });
+        Sunshine.toast(`Appointment #${id} updated to ${status}.`, 'success');
+        loadAppointments();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadPlans() {
+      try {
+        const plans = await Sunshine.request('/admin/plans');
+        const grid = document.getElementById('plans-grid');
+        grid.innerHTML = plans.map(p => `
+          <div class="p-5 bg-white border border-slate-200 rounded-2xl shadow-xs flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="badge badge-info">${p.durationType}</span>
+                <span class="badge ${p.isActive ? 'badge-success' : 'badge-danger'}">${p.isActive ? 'Active' : 'Inactive'}</span>
+              </div>
+              <h3 class="font-extrabold text-slate-900 text-base mb-1">${p.name}</h3>
+              <div class="text-2xl font-black text-teal-800 mb-2">${Sunshine.formatBDT(p.price)}</div>
+              <p class="text-xs text-slate-500 leading-relaxed">${p.description || 'Full CBT vault access.'}</p>
+            </div>
+            <div class="pt-4 border-t border-slate-100 mt-4 flex items-center justify-between text-xs">
+              <span class="text-slate-400 font-semibold">${p.durationDays} Days</span>
+              <button onclick="editPlan(${JSON.stringify(p).replace(/"/g, '&quot;')})" class="text-teal-700 hover:text-teal-900 font-bold">Edit Plan →</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function openPlanModal() {
+      document.getElementById('plan-id').value = '';
+      document.getElementById('plan-form').reset();
+      document.getElementById('plan-modal-title').textContent = 'Create Subscription Plan';
+      document.getElementById('plan-modal').classList.remove('hidden');
+    }
+
+    function editPlan(p) {
+      document.getElementById('plan-id').value = p.id;
+      document.getElementById('plan-name').value = p.name;
+      document.getElementById('plan-duration-type').value = p.durationType;
+      document.getElementById('plan-duration-days').value = p.durationDays;
+      document.getElementById('plan-price').value = p.price;
+      document.getElementById('plan-description').value = p.description || '';
+      document.getElementById('plan-active').checked = p.isActive;
+      document.getElementById('plan-modal-title').textContent = `Edit Plan #${p.id}`;
+      document.getElementById('plan-modal').classList.remove('hidden');
+    }
+
+    function closePlanModal() {
+      document.getElementById('plan-modal').classList.add('hidden');
+    }
+
+    async function savePlan(e) {
+      e.preventDefault();
+      const id = document.getElementById('plan-id').value;
+      const payload = {
+        id: id ? parseInt(id) : 0,
+        name: document.getElementById('plan-name').value.trim(),
+        durationType: document.getElementById('plan-duration-type').value,
+        durationDays: parseInt(document.getElementById('plan-duration-days').value),
+        price: parseFloat(document.getElementById('plan-price').value),
+        description: document.getElementById('plan-description').value.trim(),
+        isActive: document.getElementById('plan-active').checked
+      };
+
+      try {
+        if (id) {
+          await Sunshine.request(`/admin/plans/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+          Sunshine.toast('Plan updated successfully.', 'success');
+        } else {
+          await Sunshine.request('/admin/plans', { method: 'POST', body: JSON.stringify(payload) });
+          Sunshine.toast('Plan created successfully.', 'success');
+        }
+        closePlanModal();
+        loadPlans();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadResources() {
+      try {
+        const categories = await Sunshine.request('/patient/resources/categories');
+        const catSelect = document.getElementById('res-category');
+        catSelect.innerHTML = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+        const list = await Sunshine.request('/admin/resources');
+        const tbody = document.getElementById('resources-table-body');
+        tbody.innerHTML = list.map(r => `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="p-3.5">
+              <div class="font-bold text-slate-900">${r.title}</div>
+              <div class="text-[11px] text-slate-400">By ${r.author}</div>
+            </td>
+            <td class="p-3.5 font-semibold text-slate-700">${r.categoryName}</td>
+            <td class="p-3.5"><span class="badge badge-info">${r.resourceType}</span></td>
+            <td class="p-3.5">
+              <span class="badge ${r.isPremium ? 'badge-warning' : 'badge-success'}">${r.isPremium ? 'Premium (Sub)' : 'Free Open'}</span>
+            </td>
+            <td class="p-3.5 text-right space-x-2">
+              <a href="${r.contentUrl}" target="_blank" class="text-xs text-teal-700 hover:text-teal-900 font-bold">View ↗</a>
+              <button onclick="deleteResource(${r.id})" class="text-xs text-rose-600 hover:text-rose-800 font-bold">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function openResourceModal() {
+      document.getElementById('res-id').value = '';
+      document.getElementById('resource-form').reset();
+      document.getElementById('resource-modal-title').textContent = 'Add Digital Resource';
+      document.getElementById('resource-modal').classList.remove('hidden');
+    }
+
+    function closeResourceModal() {
+      document.getElementById('resource-modal').classList.add('hidden');
+    }
+
+    async function saveResource(e) {
+      e.preventDefault();
+      const payload = {
+        categoryId: parseInt(document.getElementById('res-category').value),
+        title: document.getElementById('res-title').value.trim(),
+        author: document.getElementById('res-author').value.trim(),
+        resourceType: document.getElementById('res-type').value,
+        isPremium: document.getElementById('res-premium').value === 'true',
+        contentUrl: document.getElementById('res-url').value.trim(),
+        description: document.getElementById('res-description').value.trim(),
+        thumbnailUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=500'
+      };
+
+      try {
+        await Sunshine.request('/admin/resources', { method: 'POST', body: JSON.stringify(payload) });
+        Sunshine.toast('Resource published to vault.', 'success');
+        closeResourceModal();
+        loadResources();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function deleteResource(id) {
+      if (!confirm('Are you sure you want to remove this resource from the vault?')) return;
+      try {
+        await Sunshine.request(`/admin/resources/${id}`, { method: 'DELETE' });
+        Sunshine.toast('Resource deleted.', 'info');
+        loadResources();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadPayments() {
+      try {
+        const list = await Sunshine.request('/admin/payments');
+        const tbody = document.getElementById('payments-table-body');
+        tbody.innerHTML = list.map(p => `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="p-3.5 font-mono text-[11px] text-slate-700 font-bold">${p.transactionId || `PAY-${p.id}`}</td>
+            <td class="p-3.5">
+              <div class="font-bold text-slate-900">${p.userFullName}</div>
+              <div class="text-[11px] text-slate-400">${p.userEmail}</div>
+            </td>
+            <td class="p-3.5 font-semibold text-slate-700">${p.paymentMethod} (${p.paymentType})</td>
+            <td class="p-3.5 font-bold text-slate-900">${Sunshine.formatBDT(p.amount)}</td>
+            <td class="p-3.5">
+              <span class="badge ${p.status === 'SUCCESS' ? 'badge-success' : (p.status === 'REFUNDED' ? 'badge-danger' : 'badge-warning')}">${p.status}</span>
+            </td>
+            <td class="p-3.5 text-right">
+              ${p.status === 'SUCCESS' ? `
+                <button onclick="refundPayment(${p.id})" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-3 py-1 rounded-lg transition">
+                  Refund bKash
+                </button>
+              ` : '<span class="text-slate-400 text-[11px]">—</span>'}
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function refundPayment(id) {
+      if (!confirm(`Are you sure you want to process a full refund for Payment #${id}?`)) return;
+      try {
+        const res = await Sunshine.request(`/admin/payments/${id}/refund`, { method: 'POST' });
+        Sunshine.toast(res.message, res.success ? 'success' : 'error');
+        loadPayments();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadAuditLogs() {
+      try {
+        const logs = await Sunshine.request('/admin/audit-logs');
+        const tbody = document.getElementById('audit-table-body');
+        if (!logs || logs.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-400">No audit logs recorded yet.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = logs.map(l => `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="p-3.5 text-slate-500 whitespace-nowrap text-[11px]">${new Date(l.createdAt).toLocaleString('en-BD')}</td>
+            <td class="p-3.5 font-bold text-slate-800">${l.actorEmail || 'System'}</td>
+            <td class="p-3.5"><span class="badge badge-info">${l.action}</span></td>
+            <td class="p-3.5 text-slate-600 font-mono text-[11px]">${l.targetType || '—'} #${l.targetId || ''}</td>
+            <td class="p-3.5 text-slate-700">${l.details || '—'}</td>
+            <td class="p-3.5 text-slate-400 font-mono text-[11px]">${l.ipAddress || '—'}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Initial view load
+    loadMetrics();
+  </script>
+</body>
+</html>

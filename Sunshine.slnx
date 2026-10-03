@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/server/">
+    <Project Path="server/Sunshine.App/Sunshine.App.csproj" />
+    <Project Path="server/Sunshine.Tests/Sunshine.Tests.csproj" />
+  </Folder>
+</Solution>
