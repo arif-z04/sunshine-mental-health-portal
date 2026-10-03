@@ -42,6 +42,17 @@ Another-Sunshine-Project/
 ├── test_verification.sh         # Automated verification script
 ├── test_bangladesh.sh           # Bangladesh requirements verification script
 ├── test_double_booking.sh       # Concurrency and double-booking test script
+├── client/                      # Modern React 19 Frontend Application (Vite 8 + Tailwind v4)
+│   ├── src/
+│   │   ├── api/                 # API Client (authApi, patientApi, doctorApi, adminApi)
+│   │   ├── context/             # AuthContext (JWT session & RBAC)
+│   │   ├── components/          # Modals (bKash/Nagad, Reschedule), DoctorCard, Banner, Navbar
+│   │   ├── pages/               # LandingPage, PatientPortal, DoctorDashboard, AdminDashboard
+│   │   └── utils/               # Bangladesh BST time, BDT currency, and hold countdown
+│   ├── package.json             # React dependencies
+│   └── vite.config.js           # Vite config with API proxy
+├── documentation/               # Comprehensive beginner-to-developer docs & React migration guide
+│   └── REACT-MIGRATION.md       # Full documentation of the React frontend migration
 ├── sql/                         # Database-First PostgreSQL SQL Pipeline
 │   ├── 01_create_database.sql   # Creates sunshine_user and sunshine_db
 │   ├── 02_extensions.sql        # Installs uuid-ossp and pgcrypto
@@ -52,34 +63,14 @@ Another-Sunshine-Project/
 │   ├── 07_test_queries.sql      # Database sanity and integrity checks
 │   └── README.md                # SQL execution documentation
 ├── docs/                        # Complete technical documentation suite
-│   ├── architecture.md          # Multi-portal architecture & design
-│   ├── database.md              # Database-First ER schema and indexing strategy
-│   ├── api.md                   # RESTful API specifications
-│   ├── authentication.md        # JWT, PBKDF2 hashing, cookie lifecycle
-│   ├── authorization.md         # Role-based access control (RBAC) & policies
-│   ├── testing.md               # Unit, integration, concurrency & E2E testing guide
-│   ├── deployment.md            # Systemd, Nginx reverse proxy, and Docker guide
-│   ├── development-guide.md     # Local developer setup and contribution workflow
-│   └── security.md              # Medical confidentiality, IDOR, and threat mitigations
 └── server/
     ├── Sunshine.App/            # Main ASP.NET Core 10 Web Application
-    │   ├── Controllers/         # AuthController, PatientController, DoctorController, AdminController, etc.
+    │   ├── Controllers/         # AuthController, PatientController, DoctorController, AdminController
     │   ├── Data/                # ApplicationDbContext (EF Core PostgreSQL mapping)
     │   ├── Models/              # Relational entity definitions (Entities.cs)
     │   ├── Services/            # Business logic: Appointment, Payment, Subscription, Audit, etc.
-    │   ├── wwwroot/             # Frontend client assets (HTML5, CSS3, Material Design JS)
-    │   │   ├── admin/           # Admin Operations Console
-    │   │   ├── doctor/          # Doctor Practice Portal
-    │   │   ├── patient/         # Patient Care Portal
-    │   │   └── index.html       # Public Homepage
-    │   └── Program.cs           # Application entrypoint & middleware pipeline
-    └── Sunshine.Tests/          # Comprehensive Automated Test Suite
-        ├── AppointmentSchedulingTests.cs
-        ├── PaymentAndSubscriptionTests.cs
-        ├── BangladeshRequirementsTests.cs
-        ├── AuditLoggingTests.cs
-        ├── AuthenticationAndRbacTests.cs
-        └── TestHelpers.cs
+    │   └── Program.cs           # Application entrypoint, CORS & middleware pipeline
+    └── Sunshine.Tests/          # Comprehensive Automated Test Suite (26 tests passing)
 ```
 
 ---
@@ -102,6 +93,7 @@ Another-Sunshine-Project/
 
 ### Prerequisites
 - .NET 10 SDK (`dotnet --version` >= 10.0.100)
+- Node.js (v18+) & npm
 - PostgreSQL 16+ (PostgreSQL 18 tested)
 - Bash shell (Linux / macOS / WSL)
 
@@ -115,6 +107,22 @@ psql -U sunshine_user -d sunshine_db -f sql/04_indexes.sql
 psql -U sunshine_user -d sunshine_db -f sql/05_constraints.sql
 psql -U sunshine_user -d sunshine_db -f sql/06_seed_data.sql
 ```
+
+### 2. Run the Full Stack Application
+
+**Backend (ASP.NET Core 10):**
+```bash
+cd server/Sunshine.App
+dotnet run --urls "http://0.0.0.0:5000"
+```
+
+**Frontend (React 19 + Vite 8):**
+```bash
+cd client
+npm install
+npm run dev
+```
+Open **`http://localhost:5173`** in your browser. All API requests are automatically routed to the backend at port 5000.
 
 Verify database integrity:
 ```bash

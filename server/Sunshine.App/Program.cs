@@ -72,6 +72,17 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("PatientOnly", policy => policy.RequireRole(AppRoles.Patient));
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "http://127.0.0.1:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -90,6 +101,8 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
