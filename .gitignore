@@ -1,0 +1,73 @@
+## =============================================================================
+## .gitignore for Sunshine Mental Health Portal (ASP.NET Core 10 / C# / Linux)
+## =============================================================================
+
+# .NET Build outputs
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+build/
+dist/
+
+# Visual Studio & OmniSharp
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.userprefs
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-project
+*.sublime-workspace
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Test Results & Code Coverage
+TestResults/
+[Tt]est[Rr]esult*/
+*.coverage
+*.coveragexml
+coverage/
+
+# Local Secrets & Environment Configuration
+.env
+.env.local
+.env.*.local
+*.local.json
+appsettings.Local.json
+appsettings.Production.json
+
+# Operating System Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Editor Temporary & Swap Files
+*~
+*.swp
+*.swo
+*.tmp
+*.bak
+*.orig
+
+# NuGet Packages & Caches
+*.nupkg
+packages/
+project.lock.json
+project.fragment.lock.json
+
+# Runtime & Process files
+*.pid
+*.sock
